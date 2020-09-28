@@ -19,6 +19,8 @@ import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
 import org.webrtc.MediaStreamTrack;
 import org.webrtc.PeerConnection;
+import org.webrtc.RtpTransceiver.RtpTransceiverInit;
+import org.webrtc.RtpTransceiver.RtpTransceiverDirection;
 import org.webrtc.RtpReceiver;
 import org.webrtc.StatsObserver;
 import org.webrtc.StatsReport;
@@ -78,6 +80,14 @@ class PeerConnectionObserver implements PeerConnection.Observer, EventChannel.St
 
     peerConnection.dispose();
     eventChannel.setStreamHandler(null);
+  }
+
+  void addTransceiverVideoSendRecv(Result result) {
+    // MediaStreamTrack tracck = new MediaStreamTrack.createMediaStreamTrack();
+    RtpTransceiverInit init = new RtpTransceiverInit(RtpTransceiverDirection.RECV_ONLY);
+    peerConnection.addTransceiver(MediaStreamTrack.MediaType.MEDIA_TYPE_VIDEO, init);
+    ConstraintsMap params = new ConstraintsMap();
+    result.success(params.toMap());
   }
 
   void createDataChannel(String label, ConstraintsMap config, Result result) {

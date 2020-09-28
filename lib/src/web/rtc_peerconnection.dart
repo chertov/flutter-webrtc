@@ -235,6 +235,13 @@ class RTCPeerConnection {
     }
   }
 
+  Future<void> addTransceiverVideoSendRecv() async {
+    if (jsutil.hasProperty(_jsPc, 'addTransceiver')) {
+      final jsOptions = js.JsObject.jsify({ 'direction': 'recvonly' });
+      jsutil.callMethod(_jsPc, 'addTransceiver', ['video', jsOptions]);
+    }
+  }
+
   RTCDTMFSender createDtmfSender(MediaStreamTrack track) {
     var jsDtmfSender = _jsPc.createDtmfSender(track.jsTrack);
     return RTCDTMFSender(jsDtmfSender);

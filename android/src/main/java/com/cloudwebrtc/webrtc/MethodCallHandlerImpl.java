@@ -294,6 +294,11 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
         peerConnectionGetStats(trackId, peerConnectionId, result);
         break;
       }
+      case "addTransceiverVideoSendRecv": {
+        String peerConnectionId = call.argument("peerConnectionId");
+        addTransceiverVideoSendRecv(peerConnectionId, result);
+        break;
+      }
       case "createDataChannel": {
         String peerConnectionId = call.argument("peerConnectionId");
         String label = call.argument("label");
@@ -834,9 +839,12 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
   public String peerConnectionInit(ConstraintsMap configuration, ConstraintsMap constraints) {
     String peerConnectionId = getNextStreamUUID();
     PeerConnectionObserver observer = new PeerConnectionObserver(this, messenger, peerConnectionId);
+
+    RTCConfiguration rtcConfiguration = parseRTCConfiguration(configuration);
+    rtcConfiguration.sdpSemantics = SdpSemantics.UNIFIED_PLAN;
     PeerConnection peerConnection
         = mFactory.createPeerConnection(
-        parseRTCConfiguration(configuration),
+        rtcConfiguration,
         parseMediaConstraints(constraints),
         observer);
     observer.setPeerConnection(peerConnection);
@@ -1394,6 +1402,18 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
       localStreams.remove(id);
     } else {
       Log.d(TAG, "mediaStreamRelease() mediaStream is null");
+    }
+  }
+
+  public void addTransceiverVideoSendRecv(final String peerConnectionId, Result result) {
+    // Forward to PeerConnectionObserver which deals with DataChannels
+    // because DataChannel is owned by PeerConnection.
+    PeerConnectionObserver pco
+        = mPeerConnectionObservers.get(peerConnectionId);
+    if (pco == null || pco.getPeerConnection() == null) {
+      Log.d(TAG, "addTransceiverVideoSendRecv() peerConnection is null");
+    } else {
+      pco.addTransceiverVideoSendRecv(result);
     }
   }
 

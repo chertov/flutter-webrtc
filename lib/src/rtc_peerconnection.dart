@@ -340,6 +340,18 @@ class RTCPeerConnection {
     return _remoteStreams;
   }
 
+  Future<void> addTransceiverVideoSendRecv() async {
+    try {
+      await _channel.invokeMethod<Map<dynamic, dynamic>>(
+          'addTransceiverVideoSendRecv', <String, dynamic>{
+        'peerConnectionId': _peerConnectionId
+      });
+      return;
+    } on PlatformException catch (e) {
+      throw 'Unable to RTCPeerConnection::addTransceiverVideoSendRecv: ${e.message}';
+    }
+  }
+
   Future<RTCDataChannel> createDataChannel(
       String label, RTCDataChannelInit dataChannelDict) async {
     try {
